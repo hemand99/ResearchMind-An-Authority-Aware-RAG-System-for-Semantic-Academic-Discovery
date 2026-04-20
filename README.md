@@ -1,5 +1,4 @@
 # ResearchMind-An-Authority-Aware-RAG-System-for-Semantic-Academic-Discovery
-# ResearchMind: An Authority-Aware RAG System for Semantic Academic Discovery
 
 ResearchMind is an end-to-end Retrieval-Augmented Generation (RAG) system built to improve how users search, understand, and interact with academic research papers. Instead of relying only on keyword-based matching, the system uses semantic retrieval, authority-aware ranking, and large language model generation to provide grounded answers from a research paper collection.
 
