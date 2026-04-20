@@ -3,7 +3,7 @@
 ResearchMind is an end-to-end Retrieval-Augmented Generation (RAG) system built to improve how users search, understand, and interact with academic research papers. Instead of relying only on keyword-based matching, the system uses semantic retrieval, authority-aware ranking, and large language model generation to provide grounded answers from a research paper collection.
 
 This project was developed as part of the **Neural Network and Deep Learning** course.
-![Project Poster](assets/poster.png)
+![Project Poster](poster.png)
 
 ## Motivation
 
@@ -97,7 +97,7 @@ Some example questions tested on the system include:
 - How are graph neural networks used in scientific research?
 
 ## Demo
-[Watch the demo video](assets/demo.mp4)
+[Watch the demo video](demo.mp4)
 
 ## Example Output
 
