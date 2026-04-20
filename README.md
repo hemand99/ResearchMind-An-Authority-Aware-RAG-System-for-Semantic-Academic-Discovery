@@ -131,3 +131,36 @@ It then generates a grounded response summarizing how recurrent neural networks 
 ├── notebooks/
 ├── data/
 └── README.md
+
+# Clone the repository
+git clone https://github.com/your-username/researchmind-rag.git
+cd researchmind-rag
+
+# Create virtual environment
+python -m venv venv
+
+# Activate environment
+# Windows:
+venv\Scripts\activate
+# Mac/Linux:
+# source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Install FAISS (if needed)
+pip install faiss-cpu
+
+# Install and setup Ollama (download from https://ollama.com first)
+
+# Pull model
+ollama pull llama3.2
+
+# Start Ollama server
+ollama serve
+
+# Run the application
+streamlit run app.py
+
+# Open in browser
+# http://localhost:8501
