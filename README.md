@@ -129,16 +129,19 @@ It then generates a grounded response summarizing how recurrent neural networks 
 
 ```bash
 ├── app.py
-├── arxiv_faiss_index.bin
-├── arxiv_metadata.pkl
 ├── requirements.txt
-├── notebooks/
-├── data/
+├── packages.txt
+├── .gitignore
+├── DEPLOYMENT.md
 └── README.md
+```
 
+## Local Run
+
+```bash
 # Clone the repository
-git clone https://github.com/your-username/researchmind-rag.git
-cd researchmind-rag
+git clone https://github.com/hemand99/ResearchMind-An-Authority-Aware-RAG-System-for-Semantic-Academic-Discovery.git
+cd ResearchMind-An-Authority-Aware-RAG-System-for-Semantic-Academic-Discovery
 
 # Create virtual environment
 python -m venv venv
@@ -152,19 +155,40 @@ venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 
-# Install FAISS (if needed)
-pip install faiss-cpu
-
-# Install and setup Ollama (download from https://ollama.com first)
-
-# Pull model
+# Install and setup Ollama
 ollama pull llama3.2
-
-# Start Ollama server
 ollama serve
+
+# Point the app to your local data files
+# Windows PowerShell:
+$env:DATA_DIR="D:\"
 
 # Run the application
 streamlit run app.py
+```
 
-# Open in browser
-# http://localhost:8501
+The app expects these files to exist either in the repository folder or in the folder set by `DATA_DIR`:
+
+- `arxiv_faiss_index.bin`
+- `arxiv_metadata.pkl`
+
+## Deployment
+
+GitHub Pages cannot host this app because it only supports static files. This project needs a Python runtime, FAISS, and an LLM endpoint.
+
+The fastest supported hosting paths are:
+
+- Streamlit Community Cloud
+- Render
+- Railway
+
+Environment variables supported by the app:
+
+- `DATA_DIR`
+- `FAISS_INDEX_PATH`
+- `METADATA_PATH`
+- `OLLAMA_URL`
+- `OLLAMA_MODEL`
+- `AUTHORITY_ALPHA`
+
+For full deployment notes, see [DEPLOYMENT.md](DEPLOYMENT.md).

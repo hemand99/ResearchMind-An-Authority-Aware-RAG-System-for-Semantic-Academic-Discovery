@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import faiss
 import numpy as np
@@ -10,13 +11,13 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 
-os.chdir(r"D:\\")
-
-FAISS_INDEX_PATH = "arxiv_faiss_index.bin"
-METADATA_PATH = "arxiv_metadata.pkl"
-OLLAMA_URL = "http://localhost:11434/api/generate"
-OLLAMA_MODEL = "llama3.2"
-ALPHA = 0.5
+BASE_DIR = Path(__file__).resolve().parent
+DATA_DIR = Path(os.getenv("DATA_DIR", BASE_DIR))
+FAISS_INDEX_PATH = Path(os.getenv("FAISS_INDEX_PATH", DATA_DIR / "arxiv_faiss_index.bin"))
+METADATA_PATH = Path(os.getenv("METADATA_PATH", DATA_DIR / "arxiv_metadata.pkl"))
+OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434/api/generate")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2")
+ALPHA = float(os.getenv("AUTHORITY_ALPHA", "0.5"))
 
 
 st.set_page_config(
@@ -29,7 +30,7 @@ st.set_page_config(
 
 @st.cache_resource(show_spinner="Loading FAISS index...")
 def load_index():
-    return faiss.read_index(FAISS_INDEX_PATH)
+    return faiss.read_index(str(FAISS_INDEX_PATH))
 
 
 @st.cache_data(show_spinner="Loading paper metadata...")
@@ -49,6 +50,18 @@ def load_keyword_index(corpus):
     return vectorizer, tfidf_matrix
 
 
+def validate_runtime_files():
+    missing_paths = [path for path in (FAISS_INDEX_PATH, METADATA_PATH) if not path.exists()]
+    if missing_paths:
+        st.error(
+            "Missing required data files:\n- "
+            + "\n- ".join(str(path) for path in missing_paths)
+            + "\n\nSet `DATA_DIR`, `FAISS_INDEX_PATH`, or `METADATA_PATH` before starting the app."
+        )
+        st.stop()
+
+
+validate_runtime_files()
 index = load_index()
 df_subset = load_metadata().reset_index(drop=True)
 model = load_model()
