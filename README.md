@@ -38,7 +38,7 @@ This helps the system not only retrieve relevant documents, but also prioritize 
 - FAISS-based dense retrieval
 - TF-IDF keyword search baseline for comparison
 - Authority-aware re-ranking
-- Grounded answer generation using `llama3.2` through Ollama
+- Grounded answer generation using `llama3.2` through Ollama or a hosted OpenAI API
 - Streamlit-based interactive chat dashboard
 - Transparent display of top source papers and ranking scores
 - Comparison of semantic search vs keyword search performance
@@ -120,6 +120,7 @@ It then generates a grounded response summarizing how recurrent neural networks 
 - scikit-learn
 - TF-IDF Vectorizer
 - Ollama
+- OpenAI Responses API
 - Llama 3.2
 - Streamlit
 - Pandas
@@ -184,11 +185,15 @@ The fastest supported hosting paths are:
 
 Environment variables supported by the app:
 
+- `LLM_PROVIDER` (`ollama` or `openai`)
 - `DATA_DIR`
 - `FAISS_INDEX_PATH`
 - `METADATA_PATH`
 - `OLLAMA_URL`
 - `OLLAMA_MODEL`
+- `OPENAI_URL`
+- `OPENAI_API_KEY`
+- `OPENAI_MODEL`
 - `AUTHORITY_ALPHA`
 
 For full deployment notes, see [DEPLOYMENT.md](DEPLOYMENT.md).

@@ -16,11 +16,15 @@ This app is not compatible with GitHub Pages because GitHub Pages only hosts sta
 
 The app now supports environment-based configuration:
 
+- `LLM_PROVIDER`
 - `DATA_DIR`
 - `FAISS_INDEX_PATH`
 - `METADATA_PATH`
 - `OLLAMA_URL`
 - `OLLAMA_MODEL`
+- `OPENAI_URL`
+- `OPENAI_API_KEY`
+- `OPENAI_MODEL`
 - `AUTHORITY_ALPHA`
 
 Examples:
@@ -28,6 +32,16 @@ Examples:
 ```powershell
 $env:DATA_DIR="D:\"
 $env:OLLAMA_URL="http://localhost:11434/api/generate"
+streamlit run app.py
+```
+
+Example for OpenAI:
+
+```powershell
+$env:DATA_DIR="D:\"
+$env:LLM_PROVIDER="openai"
+$env:OPENAI_API_KEY="your_api_key"
+$env:OPENAI_MODEL="gpt-4.1-mini"
 streamlit run app.py
 ```
 
@@ -44,7 +58,7 @@ That means online deployment requires one of these:
 
 1. Mount or upload the FAISS and metadata files to the hosting environment.
 2. Point the app to those files with `DATA_DIR` or explicit file-path variables.
-3. Expose a reachable remote `OLLAMA_URL`, or switch the app to another hosted LLM API.
+3. Expose a reachable remote `OLLAMA_URL`, or set `LLM_PROVIDER=openai` with a valid `OPENAI_API_KEY`.
 
 ## Recommended next move
 

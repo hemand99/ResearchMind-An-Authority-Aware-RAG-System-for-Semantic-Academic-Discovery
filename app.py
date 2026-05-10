@@ -15,8 +15,12 @@ BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = Path(os.getenv("DATA_DIR", BASE_DIR))
 FAISS_INDEX_PATH = Path(os.getenv("FAISS_INDEX_PATH", DATA_DIR / "arxiv_faiss_index.bin"))
 METADATA_PATH = Path(os.getenv("METADATA_PATH", DATA_DIR / "arxiv_metadata.pkl"))
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", "ollama").strip().lower()
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434/api/generate")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2")
+OPENAI_URL = os.getenv("OPENAI_URL", "https://api.openai.com/v1/responses")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
 ALPHA = float(os.getenv("AUTHORITY_ALPHA", "0.5"))
 
 
@@ -59,6 +63,43 @@ def validate_runtime_files():
             + "\n\nSet `DATA_DIR`, `FAISS_INDEX_PATH`, or `METADATA_PATH` before starting the app."
         )
         st.stop()
+
+
+def call_ollama(prompt):
+    payload = {
+        "model": OLLAMA_MODEL,
+        "prompt": prompt,
+        "stream": False,
+        "options": {"temperature": 0.15, "num_predict": 900},
+    }
+
+    response = requests.post(OLLAMA_URL, json=payload, timeout=120)
+    response.raise_for_status()
+    return response.json().get("response", "").strip() or "No answer returned by Ollama."
+
+
+def call_openai(prompt):
+    if not OPENAI_API_KEY:
+        return "OPENAI_API_KEY is not set. Add it in your deployment environment to use OpenAI."
+
+    payload = {
+        "model": OPENAI_MODEL,
+        "input": prompt,
+        "temperature": 0.15,
+        "max_output_tokens": 900,
+    }
+    headers = {
+        "Authorization": f"Bearer {OPENAI_API_KEY}",
+        "Content-Type": "application/json",
+    }
+
+    response = requests.post(OPENAI_URL, headers=headers, json=payload, timeout=120)
+    response.raise_for_status()
+    body = response.json()
+    answer_text = body.get("output_text", "").strip()
+    if answer_text:
+        return answer_text
+    return "OpenAI returned an empty response."
 
 
 validate_runtime_files()
@@ -150,23 +191,21 @@ def answer_question(query):
         "Write an elaborated answer grounded only in the documents above:"
     )
 
-    payload = {
-        "model": OLLAMA_MODEL,
-        "prompt": prompt,
-        "stream": False,
-        "options": {"temperature": 0.15, "num_predict": 900},
-    }
-
     try:
-        response = requests.post(OLLAMA_URL, json=payload, timeout=120)
-        response.raise_for_status()
-        answer_text = response.json().get("response", "").strip() or "No answer returned by Ollama."
+        if LLM_PROVIDER == "openai":
+            answer_text = call_openai(prompt)
+        else:
+            answer_text = call_ollama(prompt)
     except requests.exceptions.ConnectionError:
-        answer_text = "Could not connect to Ollama at http://localhost:11434. Please make sure the Ollama server is running."
+        if LLM_PROVIDER == "openai":
+            answer_text = "Could not connect to the OpenAI API endpoint. Check OPENAI_URL and your network access."
+        else:
+            answer_text = "Could not connect to Ollama at http://localhost:11434. Please make sure the Ollama server is running."
     except requests.exceptions.Timeout:
-        answer_text = "The Ollama request timed out. The model may still be loading."
+        answer_text = "The model request timed out. The provider may still be loading or the request may be too large."
     except requests.RequestException as exc:
-        answer_text = f"Ollama request failed: {exc}"
+        provider_name = "OpenAI" if LLM_PROVIDER == "openai" else "Ollama"
+        answer_text = f"{provider_name} request failed: {exc}"
 
     return answer_text, top_chunks
 
@@ -462,6 +501,10 @@ with st.sidebar:
             <div class="sidebar-value">Sentence-Transformers all-mpnet-base-v2</div>
         </div>
         <div class="sidebar-card">
+            <div class="sidebar-label">LLM Provider</div>
+            <div class="sidebar-value">{LLM_PROVIDER.upper()}</div>
+        </div>
+        <div class="sidebar-card">
             <div class="sidebar-label">Authority Formula</div>
             <div class="formula">final_score = cosine_similarity x (1 + 0.5 x authority_boost)</div>
         </div>
@@ -490,7 +533,7 @@ st.markdown(
             <h1 class="hero-title">Research chat over your ArXiv knowledge base</h1>
             <div class="hero-copy">
                 Ask a research question and the system retrieves semantically relevant papers,
-                applies authority-aware re-ranking, and generates an answer with Llama 3.2 via Ollama.
+                applies authority-aware re-ranking, and generates an answer with a configurable hosted or local LLM.
             </div>
         </div>
     </div>
